@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="uk-UA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPaint - Micheal Paint</title>
+    <link rel="icon" type="image/png" href="MPaint logo.png">    
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+body {
+    background-color: chcolate;
+    height: 100dvh;
+    display: flex;
+    overflow: hidden;
+    margin: 0; /* Прибирає стандартні відступи браузера */
+}
+
+.app-container {
+    display: flex;
+    flex-direction: row; /* Чітко вказуємо розташування в рядок (зліва направо) */
+    width: 100%;
+    height: 100dvh;
+}
+
+/* 🟢 ДОДАЙТЕ ЦІ СТИЛІ ДЛЯ ВАШИХ ВНУТРІШНІХ БЛОКІВ: */
+
+/* Стилі для вашого зеленого бічного меню (MPaint) */
+.sidebar { 
+    width: 250px;       /* Фіксована ширина меню, щоб воно не стискалося */
+    flex-shrink: 0;     /* Забороняє флексбоксу зменшувати цей блок */
+    height: 100%;
+}
+
+/* Стилі для блоку з текстом та основним контентом */
+.main-content { 
+    flex-grow: 1;       /* Змушує блок зайняти ВСІЙ вільний простір праворуч */
+    padding: 20px;      /* Відступи, щоб текст не прилипав до країв */
+    overflow-y: auto;   /* Якщо тексту буде багато, з'явиться акуратний скрол */
+    min-width: 0;       /* Важливо! Дозволяє тексту всередині нормально переноситися по словах */
+}
+
+        .toolbar {
+            width: 250px;
+            background-color: #22b14c;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .app-brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #a8e61d;
+            letter-spacing: -0.5px;
+            margin-bottom: 2px;
+        }
+
+        .brand-link {
+        font-size: 1rem;
+        font-weight: 400;
+        color: #a8e61d;
+        text-decoration: underline;
+        margin-left: 15px; /* Adds space between the header text and the link */
+        vertical-align: middle;
+        }
+
+        .app-subtitle {
+            font-size: 0.75rem;
+            color: #a8e61d;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #a8e61d;
+        }
+
+        .audio-debug {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* Ensure the canvas container can hold absolutely positioned elements */
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #a8e61d;
+            font-size: 0.9rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .tool-btn {
+            background-color: #187d34;
+            border: 3px solid #187d34;
+            border-radius: 8px;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            aspect-ratio: 1;
+        }
+
+        .tool-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .tool-btn:hover {
+            background-color: #2e994c;
+            border-color: #2e994c;
+        }
+
+        .tool-btn.active {
+            background-color: #a8e61d;
+            border-color: #ffffff;
+        }
+
+        select {
+            width: 100%;
+            height: 40px;
+            background-color: #187d34;
+            color: #ffffff;
+            border: 3px solid #187d34;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: #a8e61d;
+        }
+
+        select option {
+            background-color: #ffffff;
+            color: #333333;
+            font-weight: normal;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 4px solid #a8e61d;
+            border-radius: 4px;
+        }
+
+        input[type="color"]::-moz-color-swatch {
+            border: 2px solid #a8e61d;
+            border-radius: 4px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            background: #187d34;
+            border-radius: 4px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -4px;
+            height: 16px;
+            width: 16px;
+            background: #a8e61d;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            background: #187d34;
+            border-radius: 4px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            border: none;
+            height: 16px;
+            width: 16px;
+            background: #a8e61d;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+#clearBtn {
+    background-color: #000000;
+    color: red;
+    border-color: red;
+    padding: 5px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    /* Transition handles the smooth return to black when hover ends */
+    transition: background-color 0.4s ease;
+    margin-top: auto;
+}
+
+#clearBtn:hover {
+    /* Triggers the flashing animation infinitely while hovered */
+    animation: flashRed 0.6s infinite;
+}
+
+/* Defines the flashing effect between black and red */
+@keyframes flashRed {
+    0% {
+        background-color: #000000;
+    }
+    50% {
+        background-color: #ff0000;
+    }
+    100% {
+        background-color: #000000;
+    }
+}
+
+        .canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: #ffffff;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .dev-drawings {
+            left: 0;
+            position: relative;
+            border-radius: 4px;
+            border-color: #a8e61d;
+            background-color: #22b14c;
+            height: 38px;
+            width: 190px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hidden audio element using the space-free filename -->
+    <audio id="toolSfx" src="mpaint sfx.mp3" preload="auto"></audio>
+
+    <script>
+    // Знаходимо аудіоелемент за його ID
+    const audio = document.getElementById('toolSfx');
+    
+    // Встановлюємо гучність на 30% (змініть 0.3 на будь-яке значення від 0.0 до 1.0)
+    audio.volume = 0.3;
+    </script>
+
+    <div class="app-container">
+        <div class="toolbar">
+
+            <h2 class="app-brand">
+                MPaint
+            </h2>
+
+            <span class="app-subtitle">Micheal Paint v1.0</span>
+            
+            <!-- Audio Diagnostic Display -->
+            <div id="audioStatus" class="audio-debug">Звук: Завантаження...</div>
+            
+            <div class="control-group">
+                <label>Інструменти</label>
+                <div class="tools-grid">
+                    <button class="tool-btn active" data-tool="brush" title="Пензель [B]">
+                        <img src="brush tool.png" alt="Пензель">
+                    </button>
+                    <button class="tool-btn" data-tool="rubber" title="Гумка [E]">
+                        <img src="rubber tool.png" alt="Гумка">
+                    </button>
+                    <button class="tool-btn" data-tool="rectangle" title="Прямокутник [R]">
+                        <img src="rectangle tool.png" alt="Прямокутник">
+                    </button>
+                    <button class="tool-btn" data-tool="circle" title="Коло [C]">
+                        <img src="circle and oval tool.png" alt="Коло">
+                    </button>
+                    <button class="tool-btn" data-tool="paint" title="Заливка [P]">
+                        <img src="paint tool.png" alt="Заливка">
+                    </button>
+                    <button class="tool-btn" data-tool="text" title="Текст [T]">
+                        <img src="text tool.png" alt="Текст">
+                    </button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="textOrientation">Напрямок тексту</label>
+                <select id="textOrientation">
+                    <option value="horizontal">Горизонтально</option>
+                    <option value="vertical">Вертикально</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="colorPicker">Колір</label>
+                <input type="color" id="colorPicker" value="#000000">
+            </div>
+
+            <div class="control-group">
+                <label for="brushSize">Розмір: <span id="sizeValue">5</span>px</label>
+                <input type="range" id="brushSize" min="1" max="50" value="5">
+            </div>
+
+            <button id="clearBtn">Очистити</button>
+            <a href="dev-drawings.html">
+            <button class="dev-drawings">Малюнки розробника</button>
+            </a>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="paintCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            const canvas = document.getElementById('paintCanvas');
+            const ctx = canvas.getContext('2d');
+            const colorPicker = document.getElementById('colorPicker');
+            const brushSize = document.getElementById('brushSize');
+            const sizeValue = document.getElementById('sizeValue');
+            const clearBtn = document.getElementById('clearBtn');
+            const toolButtons = document.querySelectorAll('.tool-btn');
+            const textOrientation = document.getElementById('textOrientation');
+
+            // Audio references
+            const sfx = document.getElementById('toolSfx');
+            const audioStatus = document.getElementById('audioStatus');
+
+            // Verify audio load state
+            if (sfx) {
+                if (sfx.readyState >= 3) {
+                    audioStatus.textContent = "Звук: Готовий";
+                    audioStatus.style.color = "#a8e61d";
+                }
+
+                sfx.addEventListener('canplaythrough', function() {
+                    audioStatus.textContent = "Звук: Готовий";
+                    audioStatus.style.color = "#a8e61d";
+                });
+
+                sfx.addEventListener('error', function() {
+                    audioStatus.textContent = "Звук: Помилка (Файл не знайдено)";
+                    audioStatus.style.color = "#ff4d4d";
+                });
+            }
+
+            let isDrawing = false;
+            let currentTool = 'brush';
+            
+            let startX = 0;
+            let startY = 0;
+            let canvasSnapshot = null;
+
+            // Стек для операцій скасування (Undo) та повторення (Redo)
+            const maxHistory = 25;
+            let undoStack = [];
+            let redoStack = [];
+
+            // Функція збереження стану в історію
+            function saveState() {
+                redoStack = []; // Очищуємо стек Redo при новій дії
+                const state = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                undoStack.push(state);
+                if (undoStack.length > maxHistory) {
+                    undoStack.shift(); // Видаляємо найстаріший стан, якщо ліміт перевищено
+                }
+            }
+
+            function undo() {
+                if (undoStack.length > 1) {
+                    const currentState = undoStack.pop();
+                    redoStack.push(currentState);
+                    const previousState = undoStack[undoStack.length - 1];
+                    ctx.putImageData(previousState, 0, 0);
+                }
+            }
+
+            function redo() {
+                if (redoStack.length > 0) {
+                    const nextState = redoStack.pop();
+                    undoStack.push(nextState);
+                    ctx.putImageData(nextState, 0, 0);
+                }
+            }            
+
+// Helper to show a temporary error message at the center-top of the screen
+function showErrorMessage(message) {
+    let errDiv = document.getElementById('dynamic-error-msg');
+    if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'dynamic-error-msg';
+        errDiv.style.position = 'fixed';
+        errDiv.style.top = '20px';
+        errDiv.style.left = '50%';
+        errDiv.style.transform = 'translateX(-50%)';
+        errDiv.style.backgroundColor = '#ff4d4d';
+        errDiv.style.color = '#ffffff';
+        errDiv.style.padding = '12px 24px';
+        errDiv.style.borderRadius = '8px';
+        errDiv.style.fontWeight = 'bold';
+        errDiv.style.boxShadow = '0 4px 6px rgba(0,0,0,0.2)';
+        errDiv.style.zIndex = '1000';
+        errDiv.style.transition = 'opacity 0.3s ease';
+        document.body.appendChild(errDiv);
+    }
+    errDiv.textContent = message;
+    errDiv.style.opacity = '1';
+    errDiv.style.display = 'block';
+
+    // Auto-hide after 3 seconds
+    clearTimeout(errDiv.timeoutId);
+    errDiv.timeoutId = setTimeout(() => {
+        errDiv.style.opacity = '0';
+        setTimeout(() => {
+            errDiv.style.display = 'none';
+        }, 300);
+    }, 3000);
+}
+
+// Lazy-load and play the error sound effect
+let errSfx = null;
+function playErrorSfx() {
+    try {
+        if (!errSfx) {
+            errSfx = new Audio('err.mp3');
+        }
+        errSfx.currentTime = 0;
+        errSfx.play().catch(e => console.warn("Error audio blocked:", e));
+    } catch (err) {
+        console.error("Audio error:", err);
+    }
+}
+
+// Prompt the user for brush size and validate it
+function promptBrushSize() {
+    const sizeInput = prompt("Введіть розмір пензля (5-50):");
+    if (sizeInput !== null) { // If user didn't click Cancel
+        const parsedSize = parseInt(sizeInput, 10);
+        if (isNaN(parsedSize) || parsedSize < 5 || parsedSize > 50) {
+            showErrorMessage("Помилка: Розмір має бути числом від 5 до 50px!");
+            playErrorSfx();
+        } else {
+            const brushSize = document.getElementById('brushSize');
+            const sizeValue = document.getElementById('sizeValue');
+            if (brushSize && sizeValue) {
+                brushSize.value = parsedSize;
+                sizeValue.textContent = parsedSize;
+                // Dispatch input event to update any active listeners
+                brushSize.dispatchEvent(new Event('input'));
+            }
+        }
+    }
+}
+            
+            // Function to change tools programmatically (re-used by clicks and shortcuts)
+            function selectTool(toolName) {
+                const targetButton = document.querySelector(`.tool-btn[data-tool="${toolName}"]`);
+                if (!targetButton) return;
+
+                // Play the sound effect
+                if (sfx) {
+                    sfx.currentTime = 0;
+                    sfx.play()
+                        .then(() => {
+                            audioStatus.textContent = "Звук: Грає";
+                            audioStatus.style.color = "#a8e61d";
+                            setTimeout(() => {
+                                if (audioStatus.textContent === "Звук: Грає") {
+                                    audioStatus.textContent = "Звук: Готовий";
+                                }
+                            }, 400);
+                        })
+                        .catch(error => {
+                            audioStatus.textContent = "Звук: Блоковано браузером";
+                            audioStatus.style.color = "#ffb300";
+                            console.warn("Audio blocked:", error);
+                        });
+                }
+
+                toolButtons.forEach(btn => btn.classList.remove('active'));
+                targetButton.classList.add('active');
+                currentTool = toolName;
+            }
+
+            // Click listener for tool buttons
+            toolButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    selectTool(this.dataset.tool);
+                });
+            });
+
+            function resizeCanvas() {
+                let tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                if (canvas.width > 0 && canvas.height > 0) {
+                    tempCtx.drawImage(canvas, 0, 0);
+                }
+
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                if (tempCanvas.width > 0) {
+                    ctx.drawImage(tempCanvas, 0, 0);
+                }
+
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // Скидаємо стек для уникнення помилок розмірності буфера ImageData
+                undoStack = [];
+                redoStack = [];
+                saveState();
+            }
+
+            function startDrawing(e) {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                startX = e.clientX - rect.left;
+                startY = e.clientY - rect.top;
+
+                canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                if (currentTool === 'brush' || currentTool === 'rubber') {
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    draw(e);
+                } else if (currentTool === 'paint') {
+                    floodFill(Math.round(startX), Math.round(startY), colorPicker.value);
+                    isDrawing = false;
+                } else if (currentTool === 'text') {
+                    drawText(startX, startY);
+                }
+            }
+
+            function stopDrawing() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    ctx.beginPath();
+                    saveState(); // Зберігаємо стан після завершення лінії чи фігури
+                }
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                ctx.lineWidth = brushSize.value;
+
+                if (currentTool === 'brush') {
+                    ctx.strokeStyle = colorPicker.value;
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                } 
+                else if (currentTool === 'rubber') {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                } 
+                else if (currentTool === 'rectangle') {
+                    ctx.putImageData(canvasSnapshot, 0, 0);
+                    ctx.strokeStyle = colorPicker.value;
+                    ctx.beginPath();
+                    ctx.rect(startX, startY, x - startX, y - startY);
+                    ctx.stroke();
+                } 
+                else if (currentTool === 'circle') {
+                    ctx.putImageData(canvasSnapshot, 0, 0);
+                    ctx.strokeStyle = colorPicker.value;
+                    ctx.beginPath();
+                    const radius = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
+                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+            }
+
+            function drawText(x, y) {
+                const text = prompt("Введіть текст:");
+                if (text) {
+                    ctx.fillStyle = colorPicker.value;
+                    const size = parseInt(brushSize.value) * 2 + 12;
+                    ctx.font = `${size}px "Mongolian Baiti", "Noto Sans Mongolian", Arial, sans-serif`;
+
+                    const orientation = textOrientation.value;
+
+                    if (orientation === 'vertical') {
+                        ctx.textBaseline = 'top';
+                        ctx.textAlign = 'center';
+                        let currentY = y;
+                        const characters = Array.from(text);
+                        
+                        characters.forEach(char => {
+                            ctx.fillText(char, x, currentY);
+                            currentY += size * 1.1;
+                        });
+                    } else {
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(text, x, y);
+                    }
+                    saveState(); // Зберігаємо стан після введення тексту
+                }
+                isDrawing = false;
+            }
+
+            function floodFill(startX, startY, fillColorHex) {
+                const width = canvas.width;
+                const height = canvas.height;
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+
+                const targetColor = getPixelColor(data, startX, startY, width);
+                const fillRGBA = hexToRgba(fillColorHex);
+
+                if (colorMatch(targetColor, fillRGBA, 5)) return;
+
+                const stack = [[startX, startY]];
+
+                while (stack.length > 0) {
+                    const [x, y] = stack.pop();
+
+                    if (x < 0 || x >= width || y < 0 || y >= height) continue;
+
+                    const offset = (y * width + x) * 4;
+                    const currentColor = [data[offset], data[offset + 1], data[offset + 2], data[offset + 3]];
+
+                    if (colorMatch(currentColor, targetColor, 5)) {
+                        data[offset] = fillRGBA[0];
+                        data[offset + 1] = fillRGBA[1];
+                        data[offset + 2] = fillRGBA[2];
+                        data[offset + 3] = fillRGBA[3];
+
+                        stack.push([x + 1, y]);
+                        stack.push([x - 1, y]);
+                        stack.push([x, y + 1]);
+                        stack.push([x, y - 1]);
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+                saveState(); // Зберігаємо стан після заливки
+            }
+
+            function getPixelColor(data, x, y, width) {
+                const offset = (y * width + x) * 4;
+                return [data[offset], data[offset + 1], data[offset + 2], data[offset + 3]];
+            }
+
+            function colorMatch(color1, color2, tolerance = 0) {
+                return Math.abs(color1[0] - color2[0]) <= tolerance &&
+                       Math.abs(color1[1] - color2[1]) <= tolerance &&
+                       Math.abs(color1[2] - color2[2]) <= tolerance &&
+                       Math.abs(color1[3] - color2[3]) <= tolerance;
+            }
+
+            function hexToRgba(hex) {
+                const bigint = parseInt(hex.slice(1), 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = bigint & 255;
+                return [r, g, b, 255];
+            }
+
+            brushSize.addEventListener('input', function() {
+                sizeValue.textContent = this.value;
+            });
+
+            clearBtn.addEventListener('click', function() {
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                saveState(); // Зберігаємо після очищення полотна
+            });
+
+// Відстеження гарячих клавіш (незалежно від розкладки клавіатури)
+window.addEventListener('keydown', function(e) {
+    // Ігнорувати гарячі клавіші, якщо користувач пише в текстових полях
+    const activeTag = document.activeElement.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA') {
+        return;
+    }
+
+    const isCtrl = e.ctrlKey || e.metaKey; // підтримка Windows Ctrl та macOS Cmd
+
+    // Комбінації з клавішею Ctrl
+    if (isCtrl) {
+        if (e.code === 'KeyZ') {
+            e.preventDefault();
+            undo();
+            return;
+        }
+        if (e.code === 'KeyY') {
+            e.preventDefault();
+            redo();
+            return;
+        }
+        if (e.code === 'KeyR') {
+            e.preventDefault(); // Запобігає перезавантаженню сторінки
+            const colorPicker = document.getElementById('colorPicker');
+            if (colorPicker) colorPicker.click(); // Відкриває системну палітру
+            return;
+        }
+        if (e.code === 'KeyQ') {
+            e.preventDefault();
+            promptBrushSize(); // Запитує розмір пензля
+            return;
+        }
+    }
+
+    // Поодинокі гарячі клавіші
+    switch (e.code) {
+        case 'KeyB':
+            selectTool('brush');
+            break;
+        case 'KeyE':
+            selectTool('rubber');
+            break;
+        case 'KeyR': // Спрацьовує лише якщо Ctrl не натиснуто
+            selectTool('rectangle');
+            break;
+        case 'KeyC':
+            selectTool('circle');
+            break;
+        case 'KeyP':
+            selectTool('paint');
+            break;
+        case 'KeyT':
+            selectTool('text');
+            break;
+        case 'KeyH':
+            const textOrientH = document.getElementById('textOrientation');
+            if (textOrientH) {
+                textOrientH.value = 'horizontal';
+                textOrientH.dispatchEvent(new Event('change'));
+            }
+            break;
+        case 'KeyV':
+            const textOrientV = document.getElementById('textOrientation');
+            if (textOrientV) {
+                textOrientV.value = 'vertical';
+                textOrientV.dispatchEvent(new Event('change'));
+            }
+            break;
+    }
+});
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        });
+
+        
+    </script>
+
+    <script>
+        window.addEventListener('load', function() {
+window.addEventListener('load', function() {
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const brushSize = document.getElementById('brushSize');
+    const sizeValue = document.getElementById('sizeValue');
+    const clearBtn = document.getElementById('clearBtn');
+    const toolButtons = document.querySelectorAll('.tool-btn');
+    const textOrientation = document.getElementById('textOrientation');
+    const audioStatus = document.getElementById('audioStatus');
+
+    // Remove the global sfx variable to prevent early blocking.
+    // Instead, we initialize the audio object dynamically on user action.
+    let sfx = null;
+
+    function playSfx() {
+        try {
+            // Lazy-load the audio only when a tool is selected
+            if (!sfx) {
+                sfx = new Audio('mpaintsfx.mp3');
+                // Optional: visual cue that audio loaded on first interaction
+                sfx.addEventListener('canplaythrough', () => {
+                    audioStatus.textContent = "Звук: Готовий";
+                    audioStatus.style.color = "#a8e61d";
+                });
+                sfx.addEventListener('error', () => {
+                    audioStatus.textContent = "Звук: Помилка завантаження";
+                    audioStatus.style.color = "#ff4d4d";
+                });
+            }
+            
+            sfx.currentTime = 0;
+            sfx.play()
+                .then(() => {
+                    audioStatus.textContent = "Звук: Активний";
+                    audioStatus.style.color = "#a8e61d";
+                })
+                .catch(error => {
+                    audioStatus.textContent = "Звук: Блоковано";
+                    audioStatus.style.color = "#ffb300";
+                    console.warn("Audio play blocked by browser policy:", error);
+                });
+        } catch (err) {
+            console.error("Audio initialization error:", err);
+        }
+    }
+
+    // Set initial status to await user action
+    audioStatus.textContent = "Звук: Очікування дії";
+    audioStatus.style.color = "#ffffff";
+
+    let isDrawing = false;
+    let currentTool = 'brush';
+    
+    let startX = 0;
+    let startY = 0;
+    let canvasSnapshot = null;
+
+    // Стек для операцій скасування (Undo) та повторення (Redo)
+    const maxHistory = 25;
+    let undoStack = [];
+    let redoStack = [];
+
+    // Функція збереження стану в історію
+    function saveState() {
+        redoStack = []; // Очищуємо стек Redo при новій дії
+        const state = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        undoStack.push(state);
+        if (undoStack.length > maxHistory) {
+            undoStack.shift(); // Видаляємо найстаріший стан, якщо ліміт перевищено
+        }
+    }
+
+    function undo() {
+        if (undoStack.length > 1) {
+            const currentState = undoStack.pop();
+            redoStack.push(currentState);
+            const previousState = undoStack[undoStack.length - 1];
+            ctx.putImageData(previousState, 0, 0);
+        }
+    }
+
+    function redo() {
+        if (redoStack.length > 0) {
+            const nextState = redoStack.pop();
+            undoStack.push(nextState);
+            ctx.putImageData(nextState, 0, 0);
+        }
+    }
+
+    // Function to change tools programmatically
+    function selectTool(toolName) {
+        const targetButton = document.querySelector(`.tool-btn[data-tool="${toolName}"]`);
+        if (!targetButton) return;
+
+        // Play the sound effect safely on demand
+        playSfx();
+
+        toolButtons.forEach(btn => btn.classList.remove('active'));
+        targetButton.classList.add('active');
+        currentTool = toolName;
+    }
+
+    // Click listener for tool buttons
+    toolButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            selectTool(this.dataset.tool);
+        });
+    });
+
+    function resizeCanvas() {
+        let tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        if (canvas.width > 0 && canvas.height > 0) {
+            tempCtx.drawImage(canvas, 0, 0);
+        }
+
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        if (tempCanvas.width > 0) {
+            ctx.drawImage(tempCanvas, 0, 0);
+        }
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Скидаємо стек для уникнення помилок розмірності буфера ImageData
+        undoStack = [];
+        redoStack = [];
+        saveState();
+    }
+
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+
+        canvasSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        if (currentTool === 'brush' || currentTool === 'rubber') {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            draw(e);
+        } else if (currentTool === 'paint') {
+            floodFill(Math.round(startX), Math.round(startY), colorPicker.value);
+            isDrawing = false;
+        } else if (currentTool === 'text') {
+            drawText(startX, startY);
+        }
+    }
+
+    function stopDrawing() {
+        if (isDrawing) {
+            isDrawing = false;
+            ctx.beginPath();
+            saveState(); // Зберігаємо стан після завершення лінії чи фігури
+        }
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.lineWidth = brushSize.value;
+
+        if (currentTool === 'brush') {
+            ctx.strokeStyle = colorPicker.value;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        } 
+        else if (currentTool === 'rubber') {
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        } 
+        else if (currentTool === 'rectangle') {
+            ctx.putImageData(canvasSnapshot, 0, 0);
+            ctx.strokeStyle = colorPicker.value;
+            ctx.beginPath();
+            ctx.rect(startX, startY, x - startX, y - startY);
+            ctx.stroke();
+        } 
+        else if (currentTool === 'circle') {
+            ctx.putImageData(canvasSnapshot, 0, 0);
+            ctx.strokeStyle = colorPicker.value;
+            ctx.beginPath();
+            const radius = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
+            ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+    }
+
+    function drawText(x, y) {
+        const text = prompt("Введіть текст:");
+        if (text) {
+            ctx.fillStyle = colorPicker.value;
+            const size = parseInt(brushSize.value) * 2 + 12;
+            ctx.font = `${size}px "Mongolian Baiti", "Noto Sans Mongolian", Arial, sans-serif`;
+
+            const orientation = textOrientation.value;
+
+                    if (orientation === 'vertical') {
+                        ctx.textBaseline = 'top';
+                        ctx.textAlign = 'center';
+                        let currentY = y;
+                        const characters = Array.from(text);
+                        
+                        characters.forEach(char => {
+                            ctx.fillText(char, x, currentY);
+                            currentY += size * 1.1;
+                        });
+                    } else {
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(text, x, y);
+                    }
+                    saveState(); // Зберігаємо стан після введення тексту
+                }
+                isDrawing = false;
+            }
+
+            function floodFill(startX, startY, fillColorHex) {
+                const width = canvas.width;
+                const height = canvas.height;
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+
+                const targetColor = getPixelColor(data, startX, startY, width);
+                const fillRGBA = hexToRgba(fillColorHex);
+
+                if (colorMatch(targetColor, fillRGBA, 5)) return;
+
+                const stack = [[startX, startY]];
+
+                while (stack.length > 0) {
+                    const [x, y] = stack.pop();
+
+                    if (x < 0 || x >= width || y < 0 || y >= height) continue;
+
+                    const offset = (y * width + x) * 4;
+                    const currentColor = [data[offset], data[offset + 1], data[offset + 2], data[offset + 3]];
+
+                    if (colorMatch(currentColor, targetColor, 5)) {
+                        data[offset] = fillRGBA[0];
+                        data[offset + 1] = fillRGBA[1];
+                        data[offset + 2] = fillRGBA[2];
+                        data[offset + 3] = fillRGBA[3];
+
+                        stack.push([x + 1, y]);
+                        stack.push([x - 1, y]);
+                        stack.push([x, y + 1]);
+                        stack.push([x, y - 1]);
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+                saveState(); // Зберігаємо стан після заливки
+            }
+
+            function getPixelColor(data, x, y, width) {
+                const offset = (y * width + x) * 4;
+                return [data[offset], data[offset + 1], data[offset + 2], data[offset + 3]];
+            }
+
+            function colorMatch(color1, color2, tolerance = 0) {
+                return Math.abs(color1[0] - color2[0]) <= tolerance &&
+                       Math.abs(color1[1] - color2[1]) <= tolerance &&
+                       Math.abs(color1[2] - color2[2]) <= tolerance &&
+                       Math.abs(color1[3] - color2[3]) <= tolerance;
+            }
+
+            function hexToRgba(hex) {
+                const bigint = parseInt(hex.slice(1), 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = bigint & 255;
+                return [r, g, b, 255];
+            }
+
+            brushSize.addEventListener('input', function() {
+                sizeValue.textContent = this.value;
+            });
+
+            clearBtn.addEventListener('click', function() {
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                saveState(); // Зберігаємо після очищення полотна
+            });
+
+            // Відстеження клавіш Ctrl+Z, Ctrl+Y та швидких клавіш інструментів
+            window.addEventListener('keydown', function(e) {
+                // Ignore keys if the user is typing inside text boxes or dropdown menus
+                const activeTag = document.activeElement.tagName;
+                if (activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA') {
+                    return;
+                }
+
+                const isCtrl = e.ctrlKey || e.metaKey; // підтримка Windows Ctrl та macOS Cmd
+                if (isCtrl) {
+                    if (e.code === 'KeyZ') {
+                        e.preventDefault();
+                        undo();
+                        return;
+                    }
+                    if (e.code === 'KeyY') {
+                        e.preventDefault();
+                        redo();
+                        return;
+                    }
+                }
+
+                // Single key tool shortcuts (case-insensitive)
+                const key = e.code.toLowerCase();
+                switch (key) {
+                    case 'b':
+                        selectTool('brush');
+                        break;
+                    case 'e':
+                    case 'r':
+                        selectTool('rubber');
+                        break;
+                    case 'd':
+                        selectTool('rectangle');
+                        break;
+                    case 'c':
+                        selectTool('circle');
+                        break;
+                    case 'g':
+                    case 'f':
+                        selectTool('paint');
+                        break;
+                    case 't':
+                        selectTool('text');
+                        break;
+                }
+            });
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        });
+        });
+    </script>
+</body>
+</html>

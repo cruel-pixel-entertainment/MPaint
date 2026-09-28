@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk-UA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Малюнки Розробника MPaint</title>
+</head>
+<style>
+    body {
+        background-color: black;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .hyperlink {
+        color: #22b14c;
+        align-items: center;
+    }
+
+    h1 {
+        font-size: 36px;
+    }
+
+    .text {
+        align-items: center;
+        text-align: center;
+    }
+</style>
+<body>
+    <div class="text">
+        <h1>Малюнки <a href="https://www.youtube.com/@cruelpixelofficialua" title="Натисніть, щоб дізнатися хто розробник MPaint" class="hyperlink">Розробника</a> MPaint</h1>
+    </div>
+    <div class="images">
+        <img src="Богдан.png" alt="Богдан" style="width: 80vh; height: auto;">
+        <img src="Геометричний Хаос.png" alt="Геометричний Хаос" style="width: 80vh; height: auto;">
+        <img src="Знищений Смайлик.png" alt="Знищений Смайлик" style="width: 80vh; height: auto;">
+        <img src="КАКАШКА.png" alt="КАКАШКА" style="width: 80vh; height: auto;">
+        <img src="Мій Автопортрет.png" alt="Мій Автопортрет" style="width: 80vh; height: auto;">
+        <img src="Мови.png" alt="Мови" style="width: 80vh; height: auto;">
+        <img src="Мяв.png" alt="Мяв" style="width: 80vh; height: auto;">
+        <img src="Птаха.png" alt="Птаха" style="width: 80vh; height: auto;">
+        <img src="Стіна з золота.png" alt="Стіна з золота" style="width: 80vh; height: auto;">
+        <img src="Федоров, Драпатий — нас не подолати.png" alt="Федоров, Драпатий — нас не подолати" style="width: 80vh; height: auto;">
+        <img src="Чоловік з окулярами.png" alt="Чоловік з окулярами" style="width: 80vh; height: auto;">
+        <img src="чоловічок.png" alt="чоловічок" style="width: 80vh; height: auto;">
+    </div>
+    <p>
+  На жаль, Худум Монгол бічіг насправді не працює належним чином. 
+  Знімки екрана з фразою "Худум Монгол бічіг працює!" не відповідають дійсності. 
+  Для отримання додаткової інформації, будь ласка, звертайтеся на 
+  <span id="secure-email-link"></span>.
+</p>
+
+<script>
+  // 1. Break the email into separate pieces so scrapers can't read it from the raw code
+  const emailUser = "cruelpixelpublic";
+  const emailDomain = "gmail.com";
+  
+  // 2. Combine the pieces dynamically after the webpage loads
+  const fullEmail = emailUser + "@" + emailDomain;
+  
+  // 3. Insert the clickable mailto link into the empty span safely
+  const emailContainer = document.getElementById("secure-email-link");
+  emailContainer.innerHTML = '<a href="mailto:' + fullEmail + '">публічну електронну адресу</a>';
+</script>
+</body>
+</html>
